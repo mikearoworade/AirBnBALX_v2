@@ -22,6 +22,7 @@ classes = {
 class DBStorage:
     __engine = None
     __session = None
+    __session_factory = None
 
     def __init__(self):
         user = os.getenv("HBNB_MYSQL_USER")
@@ -70,7 +71,13 @@ class DBStorage:
             self.__session.delete(obj)
 
     def reload(self):
+        """Reload data from the database"""
         Base.metadata.create_all(self.__engine)
         session_factory = sessionmaker(bind=self.__engine, expire_on_commit=False)
-        Session = scoped_session(session_factory)
-        self.__session = Session()
+        self.__session_factory = scoped_session(session_factory)
+        self.__session = self.__session_factory()
+
+    def close(self):
+        """Remove the current session"""
+        self.__session_factory.remove()
+

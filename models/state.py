@@ -13,7 +13,7 @@ class State(BaseModel, Base):
 
     name = Column(String(128), nullable=False)
 
-    if storage_type == 'db':
+    if getenv('HBNB_TYPE_STORAGE') == 'db':
         cities = relationship(
             "City",
             backref="state",
@@ -25,5 +25,10 @@ class State(BaseModel, Base):
             """Returns the list of City instances with state_id == State.id"""
             from models import storage
             from models.city import City
-            return [city for city in storage.all(City).values()
-                    if city.state_id == self.id]
+            # return [city for city in storage.all(City).values() if city.state_id == self.id]
+            city_list = []
+            all_cities = storage.all(City).values()
+            for city in all_cities:
+                if city.state_id == self.id:
+                    city_list.append(city)
+            return city_list
